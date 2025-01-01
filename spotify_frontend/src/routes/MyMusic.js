@@ -20,7 +20,7 @@ const MyMusic = ()=>{
         }, []);
     return(
         <LoggedInContainer curActiveScreen="myMusic">
-            <div className="content  p-9 overflow-auto ">
+            <div className="content sm:pt-10 lg:p-7 overflow-auto ">
                 <div className="text-white text-2xl font-semibold pb-4 pl-2">My Songs</div>
                     <div className="space-y-3 overflow-auto">
                         {songData.map((item) => { 

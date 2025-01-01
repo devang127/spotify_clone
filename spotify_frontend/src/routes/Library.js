@@ -17,7 +17,7 @@ const Library = ()=>{
     return(
         <LoggedInContainer curActiveScreen={"library"}>
             <div className="text-white text-2xl font-semibold pt-9">My Playlist</div>
-            <div className=" py-5 flex grid gap-5 grid-cols-5 cursor-pointer">
+            <div className=" py-5 flex grid gap-5 grid-cols-5 sm:grid-cols-2 lg:grid-cols-4 cursor-pointer">
                 {myPlaylist.map((item)=>{
                     return <Card 
                         key={JSON.stringify(item)}
@@ -36,12 +36,12 @@ const Card = ({title, description,imgUrl, playlistid})=>{
     const navigate = useNavigate();
     return(
         <div 
-            className="bg-black bg-opacity-30 w-full p-4 rounded-lg cursor-pointer"
+            className="bg-black bg-opacity-30 w-full sm:p-4 lg:p-4 rounded-lg cursor-pointer"
             onClick={()=>{
                 navigate("/playlist/" + playlistid);
             }}    
         >
-            <div className="py-2">
+            <div className="">
                 <img className="w-full rounded-lg h-50" alt="label" src={imgUrl}/>
     
             </div>

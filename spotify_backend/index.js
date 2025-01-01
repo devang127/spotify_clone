@@ -13,7 +13,7 @@ const playlistRoutes = require("./routes/playlist");
 const cors = require("cors");
 app.use(express.json());
 app.use(cors());
-
+const likeRouter = require("./routes/like");
 // Passport JWT configuration
 const opts = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -41,6 +41,7 @@ app.use(passport.initialize());
 app.use("/auth", authRoutes);
 app.use("/song", songRoutes);
 app.use("/playlist", playlistRoutes)
+app.use("/api", likeRouter);
 
 mongoose.connect(process.env.MONGODB_URL)
     .then(() => {

@@ -62,7 +62,7 @@ const UploadSong = ()=>{
                                 />
                             )}
                         </div>
-                            <div className="bg-white w-1/6 flex items-center justify-center p-3 rounded-full cursor-pointer font-semibold"
+                            <div className="bg-white lg:w-1/3 flex items-center justify-center p-3 rounded-full cursor-pointer font-semibold"
                                 onClick={submitSong}>
                                 Submit Song
                             </div>

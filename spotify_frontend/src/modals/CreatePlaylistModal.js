@@ -35,7 +35,7 @@ const CreatePlaylistModal = ({closeModal})=>{
                         value={playlistThumbnail}
                         setValue={setPlaylistThumbnail}
                     />
-                    <div className="bg-white w-1/3 rounded-full flex font-semibold justify-center items-center py-2 cursor-pointer"
+                    <div className="bg-white sm:w-full lg:w-1/3 rounded-full flex font-semibold justify-center items-center py-2 cursor-pointer"
                         onClick={createPlaylist}
                         >Create</div>
                 </div>

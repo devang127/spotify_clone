@@ -14,6 +14,7 @@ import SinglePlaylistView from './routes/SinglePlaylistView';
 import { useCookies } from 'react-cookie';
 import songContext from './context/songContext';
 import Library from './routes/Library';
+import LikeSong from './routes/LikeSong';
 
 function App() {
   const [currentSong, setCurrentSong] = useState();
@@ -48,13 +49,14 @@ function App() {
                 }}>
               <Routes>
                 <Route path="/" element={<Navigate to="/login"/>} />
-                <Route path="/home" element={<LoggedInHomeComponent/>} />
+                {/* <Route path="/home" element={<LoggedInHomeComponent/>} /> */}
                 <Route path="/myMusic" element={<MyMusic/>} /> 
                 <Route path="/search" element={<SearchPage/>} /> 
                 <Route path="/uploadSong" element={<UploadSong/>} />
                 <Route path="/library" element={<Library/>} /> 
                 <Route path="/playlist/:playlistId" element={<SinglePlaylistView/>} /> 
-                <Route path="*" element={<Navigate to="/home"/>} />
+                <Route path='/likeSong' element={<LikeSong/>} />
+                <Route path="*" element={<Navigate to="/likeSong"/>} />
               </Routes>
             </songContext.Provider>
         ) : (

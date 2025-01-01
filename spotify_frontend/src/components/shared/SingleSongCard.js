@@ -1,9 +1,31 @@
-import { useContext } from "react"
+import { useContext, useEffect, useState } from "react"
 import songContext from "../../context/songContext"
+import { Howl, Howler } from "howler";
 
 
 const SingleSongCard = ({info, playSound}) => {
     const {currentSong, setCurrentSong} = useContext(songContext);
+    const [duration, setDuration] = useState(0); // Add duration state
+
+    useEffect(() => {
+        if (info && info.track) {
+            const sound = new Howl({
+                src: [info.track],
+                html5: true,
+                onload: function () {
+                    setDuration(sound.duration()); // Set duration when the song is loaded
+                }
+            });
+        }
+    }, [info]);
+
+    const formatTime = (time) => {
+        if (isNaN(time)) return "0:00";
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60);
+        return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+    };
+   
     
    
     return (
@@ -28,7 +50,9 @@ const SingleSongCard = ({info, playSound}) => {
                         </div>
                     </div> 
                     <div className="w-1/6 flex items-center justify-center text-gray-400 text-sm">
-                        <div>3:44</div>
+                        <div>
+                            <span>{formatTime(duration)}</span>
+                        </div>
                     </div>
                 </div>
         </div>

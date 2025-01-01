@@ -8,13 +8,17 @@ import { Howl, Howler } from "howler";
 import songContext from "../context/songContext";
 import CreatePlaylistModal from "../modals/CreatePlaylistModal";
 import AddToPlaylistModal from "../modals/AddToPlaylistModal";
-import { makeAuthenticatedPOSTRequest } from "../utils/serverHelpers";
+import { makeAuthenticatedGETRequest, makeAuthenticatedPOSTRequest } from "../utils/serverHelpers";
 
 const LoggedInContainer = ({ children, curActiveScreen }) => {
     const [createPlaylistModalOpen, setcreatePlaylistModalOpen] = useState(false);
     const [addToPlaylistModalOpen, setAddToPlaylistModalOpen] = useState(false);
     const navigate = useNavigate();
-
+    const [likedSongs, setLikedSongs] = useState([]); // Track liked songs
+    const isLiked = (songId) => likedSongs.includes(songId);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    
     const {
         currentSong,
         setCurrentSong,
@@ -34,6 +38,7 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
 
     const firstUpdate = useRef(true);
     const [shuffledQueue, setShuffledQueue] = useState([]);
+
 
     // Keep shuffledQueue in sync with queue and isShuffled
     useEffect(() => {
@@ -73,7 +78,7 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
 
     const playNext = () => {
         if (queue.length === 0) return;
-
+    
         let nextIndex;
         if (isRepeating) {
             nextIndex = currentSongIndex;
@@ -83,11 +88,6 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
         setCurrentSongIndex(nextIndex);
         const nextSong = isShuffled ? shuffledQueue[nextIndex] : queue[nextIndex];
         setCurrentSong(nextSong);
-
-        console.log('Queue length:', queue.length);
-        console.log('Shuffled queue length:', shuffledQueue.length);
-        console.log('Current index:', currentSongIndex);
-        console.log('Next index:', nextIndex);
     };
 
     const playPrevious = () => {
@@ -129,6 +129,7 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
 
 
     const toggleRepeat = () => {
+        console.log('Toggling repeat:', isRepeating);
         setIsRepeating(!isRepeating);
     };
 
@@ -139,6 +140,37 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
         soundPlayed.play();
     };
 
+    useEffect(() => {
+        console.log('isRepeating changed:', isRepeating);
+        
+    }, [isRepeating]);
+
+    const isRepeatingRef = useRef(isRepeating);
+    useEffect(() => {
+        isRepeatingRef.current = isRepeating;
+    }, [isRepeating]);
+
+    // const changeSong = (songSrc) => {
+    //     if (soundPlayed) {
+    //         soundPlayed.stop();
+    //     }
+    //     let sound = new Howl({
+    //         src: [songSrc],
+    //         html5: true,
+    //         onend: function () {
+    //             console.log('Song ended. isRepeating:', isRepeatingRef.current);
+    //             if (isRepeatingRef.current) {
+    //                 sound.play();
+    //             } else {
+    //                 playNext();
+    //             }
+    //         }
+    //     });
+    //     setSoundPlayed(sound);
+    //     sound.play();
+    //     setIsPaused(false);
+    // };
+
     const changeSong = (songSrc) => {
         if (soundPlayed) {
             soundPlayed.stop();
@@ -146,8 +178,11 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
         let sound = new Howl({
             src: [songSrc],
             html5: true,
+            onload: function () {
+                setDuration(sound.duration()); // Set duration when the song is loaded
+            },
             onend: function () {
-                if (isRepeating) {
+                if (isRepeatingRef.current) {
                     sound.play();
                 } else {
                     playNext();
@@ -155,9 +190,70 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
             }
         });
         setSoundPlayed(sound);
+        setCurrentTime(0); // Reset current time when a new song starts
         sound.play();
         setIsPaused(false);
+        
     };
+
+    useEffect(() => {
+        if (soundPlayed) {
+            let animationFrameId;
+    
+            const updateCurrentTime = () => {
+                setCurrentTime(soundPlayed.seek()); // Update current time
+                animationFrameId = requestAnimationFrame(updateCurrentTime); // Request next frame
+            };
+    
+            soundPlayed.on('play', () => {
+                animationFrameId = requestAnimationFrame(updateCurrentTime); // Start updating
+            });
+    
+            soundPlayed.on('pause', () => {
+                cancelAnimationFrame(animationFrameId); // Stop updating when paused
+            });
+    
+            soundPlayed.on('end', () => {
+                cancelAnimationFrame(animationFrameId); // Stop updating when the song ends
+            });
+    
+            return () => {
+                cancelAnimationFrame(animationFrameId); // Cleanup on unmount
+            };
+        }
+    }, [soundPlayed]);
+
+    const formatTime = (time) => {
+        if (isNaN(time)) return "0:00";
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60);
+        return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+    };
+
+    const handleSeek = (e) => {
+        const seekTime = parseFloat(e.target.value);
+        setCurrentTime(seekTime); // Update the slider position immediately
+        if (soundPlayed) {
+            soundPlayed.seek(seekTime); // Seek to the selected time
+        }
+    };
+    
+    const handleSeekStart = () => {
+        // Optional: Pause the song while seeking
+        if (!isPaused) {
+            pauseSound();
+        }
+    };
+    
+    const handleSeekEnd = () => {
+        // Optional: Resume the song after seeking
+        if (!isPaused) {
+            playSound();
+        }
+    };
+
+    
+    
 
     const pauseSound = () => {
         soundPlayed.pause();
@@ -173,9 +269,53 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
         }
     };
 
+    const [volume, setVolume] = useState(1); // Default volume is 100% (1)
+    const handleVolumeChange = (e) => {
+        const newVolume = parseFloat(e.target.value);
+        setVolume(newVolume); // Update the volume state
+        if (soundPlayed) {
+            soundPlayed.volume(newVolume); // Update the volume of the currently playing song
+        }
+    };
+    
+    const getVolumeIcon = () => {
+        if (volume === 0) {
+            return "ph:speaker-simple-x"; // Mute icon
+        } else if (volume < 0.5) {
+            return "ph:speaker-simple-low"; // Low volume icon
+        } else {
+            return "ph:speaker-simple-high"; // High volume icon
+        }
+    };
 
-    
-    
+//    Like methods
+    const likeSong = async (songId) => {
+        try {
+            const response = await makeAuthenticatedPOSTRequest("/api/like", { songId });
+            if (response.message) {
+                console.log(response.message);
+                setLikedSongs([...likedSongs, songId]); // Update state
+            } else {
+                console.error(response.error);
+            }
+        } catch (err) {
+            console.error("Error liking song:", err);
+        }
+    };
+
+    const unlikeSong = async (songId) => {
+        try {
+            const response = await makeAuthenticatedPOSTRequest("/api/unlike", { songId });
+            if (response.message) {
+                console.log(response.message);
+                setLikedSongs(likedSongs.filter((id) => id !== songId)); // Update state
+            } else {
+                console.error(response.error);
+            }
+        } catch (err) {
+            console.error("Error unliking song:", err);
+        }
+    };
     
     return (
     <div className="h-full w-full bg-app-black">
@@ -189,8 +329,8 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
         }
         <div className={`${currentSong?"h-9/10":"h-full"} w-full flex`}>
             {/* {sidebar} */}
-            <div className="h-full w-1/6 bg-black flex flex-col justify-between">
-                <div>
+            <div className="h-full sm:w-1/4 lg:w-1/6 bg-black flex flex-col justify-between">
+                <div className="pr-2">
                     <div className="logo p-5">
                         <img 
                             src={spotify_logo}
@@ -199,13 +339,19 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
                             />
                     </div>
                     <div className="py-4">
-                        <IconText 
+                        {/* <IconText 
                             iconName={"material-symbols:home"} 
                             displayText={"Home"}
                             
                             targetLink="/home"
                             active={curActiveScreen === "home"}
-                            />
+                            /> */}
+                        <IconText 
+                        iconName={"mdi:cards-heart"} 
+                        displayText={"Liked Songs"}
+                        targetLink="/LikeSong"
+                        active={curActiveScreen === "likeSong"}
+                        />
                         <IconText 
                             iconName={"material-symbols:search-rounded"} 
                             displayText={"Search"}
@@ -218,45 +364,30 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
                             active={curActiveScreen === "library"}
                             targetLink={"/library"}
                             />
+                        
+                    </div>
+                    <div className="py-2">
                         <IconText 
                             iconName={"material-symbols:library-music-sharp"} 
                             displayText={"My Music"}
                             targetLink="/myMusic"
                             active={curActiveScreen === "myMusic"}
                             />
-                    </div>
-                    <div className="py-2">
                         <IconText 
                             iconName={"material-symbols:add-box"} 
                             displayText={"Create Playlist"}
                             onClick={()=>setcreatePlaylistModalOpen(true)}
                             />
-                        <IconText 
-                            iconName={"mdi:cards-heart"} 
-                            displayText={"Liked Songs"}
-                            />
-                    </div>
+                    </div>  
                 </div>
                 <div className="px-5 flex pb-10">
-                    <div className="border border-gray-500 hover:border-white cursor-pointer text-white rounded-full w-2/5 flex items-center justify-center py-1">
-                        <Icon icon="meteor-icons:globe"/>
-                        <div className="ml-2 text-sm">
-                            English 
-                        </div>
-                    </div>
+                    
                 </div>
             </div>
             {/* {main screen} */}
             <div className="h-full w-full bg-app-black overflow-auto">
                 <div className="navbar w-full bg-black h-1/10 bg-opacity-40 flex items-center justify-end">
-                <div className="w-1/2 h-full flex items-center ">
-                    <div className="w-2/3 flex justify-around">
-                        <TextWithHover displayText={"Support"}/>
-                        <TextWithHover displayText={"Download"}/>
-                        <TextWithHover displayText={"Premium"}/>
-                        <div className="border border-white opacity-50"></div>
-                    </div>
-                    <div className="w-1/3 flex justify-around h-full items-center">
+                <div className="w-1/2 h-full flex justify-end pr-2 items-center space-x-2">    
                     <TextWithHover 
                         displayText={"Upload Song"}
                         targetLink="/uploadSong"
@@ -265,10 +396,10 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
                         <div className="bg-white w-10 h-10 cursor-pointer  flex items-center justify-center rounded-full semi-bold">
                             DS
                         </div>
-                    </div>
+                    
                 </div>
                 </div>
-                <div className="content p-9 overflow-auto pt-0">
+                <div className="content p-8 overflow-auto pt-0">
                     {children}
                 </div>
             </div>
@@ -342,9 +473,39 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
                             }}
                         />
                     </div>
-                    {/* <div>progress bar here</div> */}
+                    <div className="progressbar w-full ">
+                            <input
+                                type="range"
+                                min={0}
+                                max={duration || 0}
+                                value={currentTime}
+                                className="w-full progressbar h-1 rounded-lg appearance-none cursor-pointer "
+                                style={{backgroundColor:"#1db954"}}
+                                onChange={handleSeek}
+                                onMouseDown={handleSeekStart}
+                                onMouseUp={handleSeekEnd}
+                            />
+                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>{formatTime(currentTime)}</span>
+                            <span>{formatTime(duration)}</span>
+                        </div>
+                    </div>
                 </div>
                 <div className="w-1/4 flex justify-end pr-4 space-x-4 items-center">
+                            <Icon
+                                icon={getVolumeIcon()}
+                                fontSize={25}
+                                className="cursor-pointer text-gray-500 hover:text-white"
+                            />
+                            <input
+                                type="range"
+                                min={0}
+                                max={1}
+                                step={0.01}
+                                value={volume}
+                                onChange={handleVolumeChange}
+                                className="w-24 volume h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                            />
                     <Icon
                         icon="ic:round-playlist-add"
                         fontSize={30} 
@@ -352,9 +513,22 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
                         onClick={()=>setAddToPlaylistModalOpen(true)}
                     />
                     <Icon
-                        icon="ph:heart-bold"
-                        fontSize={25} 
-                        className=" cursor-pointer text-gray-500 hover:text-white"
+                        icon={isLiked(currentSong._id) ? "ph:heart-fill" : "ph:heart-bold"}
+                        fontSize={25}
+                        className={`cursor-pointer ${isLiked(currentSong._id) ? "text-green-500" : "text-gray-500"}`}
+                        onClick={() => {
+                            if (currentSong) {
+                                if (isLiked(currentSong._id)) {
+                                    unlikeSong(currentSong._id);
+                                    setLikedSongs(likedSongs.filter((id) => id !== currentSong._id)); // Update state
+                                } else {
+                                    likeSong(currentSong._id);
+                                    setLikedSongs([...likedSongs, currentSong._id]); // Update state
+                                }
+                            } else {
+                                console.log("No current song to like/unlike");
+                            }
+                        }}
                     />
                 </div>
             </div>

@@ -2,3 +2,106 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+input[type="range"] .progressbar {
+    -webkit-appearance:none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+    background: #1db954;
+}
+
+input[type="range"] .progressbar ::-webkit-slider-runnable-track {
+    background: #1db954; /* Track color */
+    height: 4px;
+    border-radius: 2px;
+}
+input[type="range"] .progressbar ::-webkit-slider-runnable-track:hover {
+    
+}
+
+input[type="range"].progressbar::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    background: #ffffff; /* Thumb color */
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-top: -1px; /* Center the thumb on the track */
+    transition: transform 0.2s ease-in-out;
+}
+
+input[type="range"].progressbar::-webkit-slider-thumb:hover {
+    transform: scale(1.2); /* Enlarge thumb on hover */
+   
+}
+
+input[type="range"].progressbar::-moz-range-track {
+    /* background: #4a5568; Track color */
+    height: 4px;
+    border-radius: 2px;
+}
+
+input[type="range"].progressbar::-moz-range-thumb {
+    background: #ffffff; /* Thumb color */
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    transition: transform 0.2s ease-in-out;
+}
+
+input[type="range"].progressbar::-moz-range-thumb:hover {
+    transform: scale(1.2); /* Enlarge thumb on hover */
+  
+}
+
+input[type="range"].volume {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+    
+}
+
+
+/* vvolume */
+input[type="range"].volume::-webkit-slider-runnable-track {
+    background: #1db954; /* Track color */
+    height: 4px;
+    border-radius: 2px;
+}
+
+input[type="range"].volume::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    background: #ffffff; /* Thumb color */
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-top: -4px; /* Center the thumb on the track */
+    transition: transform 0.2s ease-in-out;
+}
+
+input[type="range"].volume::-webkit-slider-thumb:hover {
+    transform: scale(1.2); /* Enlarge thumb on hover */
+}
+
+input[type="range"].volume::-moz-range-track {
+    background: #4a5568; /* Track color */
+    height: 4px;
+    border-radius: 2px;
+}
+
+input[type="range"].volume::-moz-range-thumb {
+    background: #ffffff; /* Thumb color */
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    transition: transform 0.2s ease-in-out;
+}
+
+input[type="range"].volume::-moz-range-thumb:hover {
+    transform: scale(1.2); /* Enlarge thumb on hover */
+}
