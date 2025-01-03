@@ -3,18 +3,20 @@ import { createContext } from "react";
 const songContext = createContext({
   currentSong: null,
   setCurrentSong: (currentSong) => {},
-  soundPlayed:null, 
-  setSoundPlayed: ()=>{},
-  isPaused:null, 
-  setIsPaused:()=>{},
+  soundPlayed: null,
+  setSoundPlayed: () => {},
+  isPaused: null,
+  setIsPaused: () => {},
   queue: [],
-  setQueue: ()=>{},
+  setQueue: () => {},
   isShuffled: false,
-  setIsShuffled: ()=>{},
+  setIsShuffled: () => {},
   isRepeating: false,
-  setIsRepeating: ()=>{},
+  setIsRepeating: () => {},
   currentSongIndex: -1,
-  setCurrentSongIndex: ()=>{}
+  setCurrentSongIndex: () => {},
+  currentTime : 0, 
+  setCurrentTime : () => {},
 });
 
 export default songContext;

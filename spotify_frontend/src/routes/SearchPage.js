@@ -9,14 +9,14 @@ const SearchPage = () => {
     const [searchText, setSearchText] = useState("")
     const [songData, setSongData] = useState([])
     
-    const searchSong = async ()=>{
-        const response = await makeAuthenticatedGETRequest("/song/get/songname/" +searchText);
+    const searchSong = async () => {
+        // Convert search text to lowercase before sending to the backend
+        const response = await makeAuthenticatedGETRequest("/song/get/songname/" + searchText.toLowerCase());
         setSongData(response.data);
-        
     }
 
     return(
-        <LoggedInContainer curActiveScreen="search">
+        // <LoggedInContainer curActiveScreen="search">
             <div className="w-full py-4 ">
                 <div className={` w-1/3 p-3 text-sm rounded-full bg-gray-900 px-6 flex text-white space-x-3 ${isInputFocused ? "border border-white":""}`}>
                     <Icon icon="akar-icons:search" className="text-2xl items-center flex"/>
@@ -33,6 +33,7 @@ const SearchPage = () => {
                         value={searchText}
                         onChange={(e)=>{
                             setSearchText(e.target.value)
+                            searchSong(); // Optional: Trigger search as user types
                         }}
                         onKeyDown={(e)=>{
                             if(e.key === "Enter"){
@@ -55,7 +56,7 @@ const SearchPage = () => {
                     :<div className="text-gray-400 p-10">Nothing to show here</div>
                 }
             </div>
-        </LoggedInContainer>
+        // </LoggedInContainer>
     )
 }
 

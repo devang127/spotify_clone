@@ -4,8 +4,10 @@ import { Howl, Howler } from "howler";
 
 
 const SingleSongCard = ({info, playSound}) => {
-    const {currentSong, setCurrentSong} = useContext(songContext);
-    const [duration, setDuration] = useState(0); // Add duration state
+    const {
+        currentSong,
+        setCurrentSong} = useContext(songContext);
+    const [duration, setDuration] = useState(0);
 
     useEffect(() => {
         if (info && info.track) {

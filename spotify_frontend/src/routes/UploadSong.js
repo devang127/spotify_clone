@@ -25,7 +25,7 @@ const UploadSong = ()=>{
         navigate("/home")
     }
     return (
-        <LoggedInContainer curActiveScreen="Upload Songs">
+        // <LoggedInContainer curActiveScreen="Upload Songs">
             <div className="content  p-9 overflow-auto pt-0">
                         <div className="text-2xl font-semibold mb-5 text-white mt-8">
                             Upload Your Music
@@ -67,7 +67,7 @@ const UploadSong = ()=>{
                                 Submit Song
                             </div>
             </div>
-        </LoggedInContainer>
+        // </LoggedInContainer>
             
     )
 }

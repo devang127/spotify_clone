@@ -24,7 +24,8 @@ const LikeSong = () => {
     }, []);
 
     return (
-        <LoggedInContainer curActiveScreen="likeSong">
+        <>
+        {/* // <LoggedInContainer curActiveScreen="likeSong"> */}
             <div className="text-white text-xl font-semibold pb-4 pl-2 pt-8">
                 Liked Songs
             </div>
@@ -33,7 +34,8 @@ const LikeSong = () => {
                     <SingleSongCard key={song._id} info={song} playSound={() => {}} />
                 ))}
             </div>
-        </LoggedInContainer>
+        {/* // </LoggedInContainer> */}
+                </>
     );
 };
 

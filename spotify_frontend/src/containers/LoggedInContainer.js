@@ -9,16 +9,15 @@ import songContext from "../context/songContext";
 import CreatePlaylistModal from "../modals/CreatePlaylistModal";
 import AddToPlaylistModal from "../modals/AddToPlaylistModal";
 import { makeAuthenticatedGETRequest, makeAuthenticatedPOSTRequest } from "../utils/serverHelpers";
+import React, { memo } from 'react';
 
-const LoggedInContainer = ({ children, curActiveScreen }) => {
+const LoggedInContainer = memo(({ children, curActiveScreen }) => {
     const [createPlaylistModalOpen, setcreatePlaylistModalOpen] = useState(false);
     const [addToPlaylistModalOpen, setAddToPlaylistModalOpen] = useState(false);
-    const navigate = useNavigate();
-    const [likedSongs, setLikedSongs] = useState([]); // Track liked songs
+    const [likedSongs, setLikedSongs] = useState([]);
     const isLiked = (songId) => likedSongs.includes(songId);
-    const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
-    
+
     const {
         currentSong,
         setCurrentSong,
@@ -33,12 +32,13 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
         isRepeating,
         setIsRepeating,
         currentSongIndex,
-        setCurrentSongIndex
+        setCurrentSongIndex,
+        currentTime,
+        setCurrentTime,
     } = useContext(songContext);
 
     const firstUpdate = useRef(true);
     const [shuffledQueue, setShuffledQueue] = useState([]);
-
 
     // Keep shuffledQueue in sync with queue and isShuffled
     useEffect(() => {
@@ -75,6 +75,19 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
             setShuffledQueue([...shuffledQueue, song]);
         }
     };
+
+    const setQueueAndPlay = (songs, indexToPlay) => {
+        setQueue(songs);
+        setIsShuffled(false);
+        setShuffledQueue([...songs]);
+        setCurrentSongIndex(indexToPlay);
+        if (songs.length > 0) {
+          setCurrentSong(songs[indexToPlay]);
+          if (!isPaused) {
+            changeSong(songs[indexToPlay].track);
+          }
+        }
+      };
 
     const playNext = () => {
         if (queue.length === 0) return;
@@ -179,7 +192,7 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
             src: [songSrc],
             html5: true,
             onload: function () {
-                setDuration(sound.duration()); // Set duration when the song is loaded
+                setDuration(sound.duration());
             },
             onend: function () {
                 if (isRepeatingRef.current) {
@@ -187,41 +200,40 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
                 } else {
                     playNext();
                 }
-            }
+            },
         });
         setSoundPlayed(sound);
         setCurrentTime(0); // Reset current time when a new song starts
         sound.play();
         setIsPaused(false);
-        
     };
 
     useEffect(() => {
         if (soundPlayed) {
-            let animationFrameId;
-    
-            const updateCurrentTime = () => {
-                setCurrentTime(soundPlayed.seek()); // Update current time
-                animationFrameId = requestAnimationFrame(updateCurrentTime); // Request next frame
-            };
-    
-            soundPlayed.on('play', () => {
-                animationFrameId = requestAnimationFrame(updateCurrentTime); // Start updating
-            });
-    
-            soundPlayed.on('pause', () => {
-                cancelAnimationFrame(animationFrameId); // Stop updating when paused
-            });
-    
-            soundPlayed.on('end', () => {
-                cancelAnimationFrame(animationFrameId); // Stop updating when the song ends
-            });
-    
-            return () => {
-                cancelAnimationFrame(animationFrameId); // Cleanup on unmount
-            };
+          let animationFrameId;
+      
+          const updateCurrentTime = () => {
+            setCurrentTime(soundPlayed.seek()); // Use context setter
+            animationFrameId = requestAnimationFrame(updateCurrentTime);
+          };
+      
+          soundPlayed.on('play', () => {
+            animationFrameId = requestAnimationFrame(updateCurrentTime);
+          });
+      
+          soundPlayed.on('pause', () => {
+            cancelAnimationFrame(animationFrameId);
+          });
+      
+          soundPlayed.on('end', () => {
+            cancelAnimationFrame(animationFrameId);
+          });
+      
+          return () => {
+            cancelAnimationFrame(animationFrameId);
+          };
         }
-    }, [soundPlayed]);
+      }, [soundPlayed]);
 
     const formatTime = (time) => {
         if (isNaN(time)) return "0:00";
@@ -251,9 +263,6 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
             playSound();
         }
     };
-
-    
-    
 
     const pauseSound = () => {
         soundPlayed.pause();
@@ -351,6 +360,7 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
                         displayText={"Liked Songs"}
                         targetLink="/LikeSong"
                         active={curActiveScreen === "likeSong"}
+                        
                         />
                         <IconText 
                             iconName={"material-symbols:search-rounded"} 
@@ -385,7 +395,7 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
                 </div>
             </div>
             {/* {main screen} */}
-            <div className="h-full w-full bg-app-black overflow-auto">
+            <div className="h-full w-full bg-app-black overflow-auto scrollbar-hide">
                 <div className="navbar w-full bg-black h-1/10 bg-opacity-40 flex items-center justify-end">
                 <div className="w-1/2 h-full flex justify-end pr-2 items-center space-x-2">    
                     <TextWithHover 
@@ -535,7 +545,7 @@ const LoggedInContainer = ({ children, curActiveScreen }) => {
         }
     </div>
     )
-}
+})
 
 
 export default LoggedInContainer;

@@ -19,7 +19,7 @@ const MyMusic = ()=>{
                     getData();
         }, []);
     return(
-        <LoggedInContainer curActiveScreen="myMusic">
+        // <LoggedInContainer curActiveScreen="myMusic">
             <div className="content sm:pt-10 lg:p-7 overflow-auto ">
                 <div className="text-white text-2xl font-semibold pb-4 pl-2">My Songs</div>
                     <div className="space-y-3 overflow-auto">
@@ -31,7 +31,7 @@ const MyMusic = ()=>{
                         })}
                     </div>
             </div>
-        </LoggedInContainer>
+        // </LoggedInContainer>
     )
 }
 export default MyMusic;

@@ -17,7 +17,8 @@ const SinglePlaylistView = () => {
     },[])
 
     return(
-        <LoggedInContainer curActiveScreen={"library"}>
+        <>
+         {/* <LoggedInContainer curActiveScreen={"library"}> */}
             {playlistDetails._id && (
                 <div>
                     <div className="text-white text-xl pt-8 font-semibold">
@@ -29,13 +30,14 @@ const SinglePlaylistView = () => {
                         info={item} 
                         key={JSON.stringify(item)}
                         playSound={()=>{}}
-                            />
-                            })}
+                        />
+                    })}
                     </div>
                 </div>
             )}
 
-        </LoggedInContainer>
+         {/* </LoggedInContainer> */}
+    </>
     )
 
 }

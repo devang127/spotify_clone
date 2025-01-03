@@ -15,20 +15,22 @@ const Library = ()=>{
     }, [])
      
     return(
-        <LoggedInContainer curActiveScreen={"library"}>
+        <>
+        {/* // <LoggedInContainer curActiveScreen={"library"}> */}
             <div className="text-white text-2xl font-semibold pt-9">My Playlist</div>
             <div className=" py-5 flex grid gap-5 grid-cols-5 sm:grid-cols-2 lg:grid-cols-4 cursor-pointer">
                 {myPlaylist.map((item)=>{
                     return <Card 
-                        key={JSON.stringify(item)}
-                        title={item.name} 
-                        description=""
-                        imgUrl={item.thumbnail}
-                        playlistid={item._id}
+                    key={JSON.stringify(item)}
+                    title={item.name} 
+                    description=""
+                    imgUrl={item.thumbnail}
+                    playlistid={item._id}
                     />
                 })}
             </div>
-        </LoggedInContainer>
+        {/*  </LoggedInContainer> */}
+                </>
     )
 }
 
